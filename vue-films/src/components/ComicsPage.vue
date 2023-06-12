@@ -13,7 +13,7 @@
             <strong>Creators:</strong> {{ getCreators(comic) }}
           </p>
           <button @click="addToFavorites(comic)" class="favorite-button">
-            <i class="fa fa-heart"></i>
+            <IconLove />
           </button>
         </div>
       </div>
@@ -29,9 +29,12 @@ import { defineComponent } from 'vue'
 import { useCounterStore } from '@/stores/store'
 import axios from 'axios'
 import md5 from 'md5'
-
+import IconLove from '@/components/icons/IconLove.vue';
 
 export default defineComponent({
+  components: {
+    IconLove,
+  },
   computed: {
     comics() {
       return useCounterStore().comicsData
@@ -45,8 +48,9 @@ export default defineComponent({
   },
   methods: {
     fetchComicsData() {
-      const publicKey = process.env.VUE_APP_PUBLIC_KEY;
-      const privateKey = process.env.VUE_APP_PRIVATE_KEY;
+      const publicKey = import.meta.env.VITE_APP_PUBLIC_KEY;
+const privateKey = import.meta.env.VITE_APP_PRIVATE_KEY;
+
       const ts = new Date().getTime().toString()
       const hash = md5(ts + privateKey + publicKey)
       const apiUrl = 'https://gateway.marvel.com/v1/public/comics'
@@ -60,7 +64,10 @@ export default defineComponent({
           },
         })
         .then(response => {
-          const comicsData = response.data.data.results
+          const comicsData = response.data.data.results.map(comic => ({
+        ...comic,
+        favorite: false, // Add the favorite property to each comic
+      }))
           useCounterStore().updateComicsData(comicsData)
         })
         .catch(error => {
@@ -120,16 +127,31 @@ h1 {
   font-size: 18px;
   margin-top: 10px;
   margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Number of lines to show */
+  -webkit-box-orient: vertical;
 }
 
 .comic-description {
   font-size: 14px;
   margin-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Number of lines to show */
+  -webkit-box-orient: vertical;
 }
 
 .comic-creators {
   font-size: 12px;
   margin-bottom: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Number of lines to show */
+  -webkit-box-orient: vertical;
 }
 
 .favorite-button {
@@ -138,10 +160,6 @@ h1 {
   cursor: pointer;
 }
 
-.favorite-button i {
-  color: red;
-  font-size: 18px;
-}
 
 .favorites-badge {
   position: fixed;

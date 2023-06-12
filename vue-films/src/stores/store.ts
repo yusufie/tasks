@@ -16,7 +16,12 @@ export const useCounterStore = defineStore('counter', () => {
   }
 
   function addFavorite(comic) {
-    favoriteCount.value++
+    if (comic.favorite) {
+      favoriteCount.value--
+    } else {
+      favoriteCount.value++
+    }
+    comic.favorite = !comic.favorite
     // You can add your logic to store the favorite comic here
   }
 
